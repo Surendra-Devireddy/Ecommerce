@@ -22,7 +22,7 @@ public class orderController {
 	
 	@PostMapping(value="/placeOrder")
 	public ResponseEntity<String> placeOrder(@RequestBody OrderDTO orderDTO ){
-		System.out.println(orderDTO.toString());
+		
 		orderService.placeOrder(orderDTO);
 		return new ResponseEntity<String>("Order Placed Successfully",HttpStatus.CREATED);
 	}
