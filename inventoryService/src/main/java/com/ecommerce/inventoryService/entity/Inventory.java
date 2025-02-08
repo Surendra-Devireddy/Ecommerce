@@ -1,4 +1,4 @@
-package com.ecommerce.orderService.entity;
+package com.ecommerce.inventoryService.entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -6,23 +6,21 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name="order_line_items")
+
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
-public class OrderLineItems {
+@Table(name="inventory")
+public class Inventory {
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private long id;
+	private Long id;
 	private String skuCode;
-	private double price;
 	private Integer quantity;
+	
 	
 
 }
