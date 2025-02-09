@@ -27,7 +27,7 @@ public class OrderService {
 	
 	@Autowired
 	private OrderRepository orderRepository;
-	private final WebClient webClient;
+	private final WebClient.Builder webClientBuilder;
 	
 	public void placeOrder(OrderDTO orderDTO) {
 		Order order = new Order();
@@ -46,8 +46,9 @@ public class OrderService {
 		
 		//Communicate with the Inventory service to check the availability of product
 		//Webclient is a latest HTTP Client in the Spring boot supports sync, async, streaming srevices
-		 InventoryResponse[] inventoryResponseArray= webClient.get()
-					.uri("http://localhost:8082/api/inventory/search", 
+		//Since we are using service discovery we dont have to put local host we can just use appplication name
+		 InventoryResponse[] inventoryResponseArray= webClientBuilder.build().get()
+					.uri("http://inventoryservice/api/inventory/search", 
 							uriBuilder -> uriBuilder.queryParam("skuCode", skuCodes).build()) //To pass the query param
 					.retrieve()       // to get the response
 					.bodyToMono(InventoryResponse[].class)  // To convert the response to the array
