@@ -18,14 +18,29 @@ import org.springframework.web.bind.annotation.RestController;
 import com.ecommerce.inventoryService.DTO.InventoryResponse;
 import com.ecommerce.inventoryService.service.InventoryService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping(value="/api/inventory")
 @RequiredArgsConstructor
+@Tag(
+		name="Rest APIs for Inventory",
+		description="API to check and decrease the inventory"
+		)
 public class InventoryController {
 	
 	private final InventoryService inventoryService;
+	@Operation(
+			summary="Stock Checking",
+			description="This API is to check the product availability in the Ecommerce database"
+			)
+	@ApiResponse(
+			responseCode="200",
+			description="HTTP Status ok"
+			)
 	
 	@GetMapping(value="/search")
 	@ResponseStatus(HttpStatus.OK)
@@ -34,6 +49,14 @@ public class InventoryController {
 		return inventoryService.getStockStatus(skuCode);
 	}
 	
+	@Operation(
+			summary="Quantity reduction",
+			description="API to reduce the product quantity in the Ecommerce database"
+			)
+	@ApiResponse(
+			responseCode="200",
+			description="HTTP Status ok"
+			)
 	@PatchMapping(value="/quantityReduction")
 	@ResponseStatus(HttpStatus.OK)
 	public void quantityReduction(@RequestBody Map<String,Integer> inventoryData) {
