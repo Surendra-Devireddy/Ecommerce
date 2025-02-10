@@ -11,7 +11,7 @@ import org.springframework.stereotype.Repository;
 import com.ecommerce.inventoryService.entity.Inventory;
 
 @Repository
-public interface inventoryRepository extends CrudRepository<Inventory, Long>{
+public interface inventoryRepository extends CrudRepository<Inventory, String>{
 
 	
 	/*

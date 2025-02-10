@@ -2,7 +2,9 @@ package com.ecommerce.orderService.service;
 
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,6 +69,18 @@ public class OrderService {
 		if(allProductsinStock) {
 			
 		orderRepository.save(order);
+		//Making a synchronous call to inventory service to decrease the inventory quantity based on the order items
+		Map<String, Integer> inventoryData= new HashMap<>();
+		for(OrderLineItems orderLineItem : orderLineItems) {
+			inventoryData.put(orderLineItem.getSkuCode(),orderLineItem.getQuantity());
+		}
+		
+		webClientBuilder.build().patch()
+								.uri("http://inventoryservice/api/inventory/quantityReduction")
+								.bodyValue(inventoryData)  // Automatically parse the value to json
+								.retrieve()
+								.bodyToMono(Void.class)
+								.block();
 		}else {
 			throw new IllegalArgumentException("product not in stock");
 		}

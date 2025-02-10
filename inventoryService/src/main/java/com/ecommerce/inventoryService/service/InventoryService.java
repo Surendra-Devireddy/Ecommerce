@@ -1,10 +1,13 @@
 package com.ecommerce.inventoryService.service;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
 import com.ecommerce.inventoryService.DTO.InventoryResponse;
+import com.ecommerce.inventoryService.entity.Inventory;
 import com.ecommerce.inventoryService.repository.inventoryRepository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,5 +32,20 @@ public class InventoryService {
 				.toList();
 	
 	}
+	
+	public Integer getQuantity(String skuCode) {
+		 Optional<Inventory> inventory=inventoryRepository.findById(skuCode);
+		return inventory.get().getQuantity();
+	}
 
+	public void reduceQuantity(Map<String,Integer> inventoryData) {
+		for(Map.Entry<String,Integer> entry: inventoryData.entrySet()) {
+		Inventory inventory = new Inventory();
+		inventory.setSkuCode(entry.getKey());
+		inventory.setQuantity(getQuantity(inventory.getSkuCode()) - entry.getValue());
+		inventoryRepository.save(inventory);
+		
+	}
+
+}
 }
