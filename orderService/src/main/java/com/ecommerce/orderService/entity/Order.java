@@ -12,6 +12,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 
 @Entity
@@ -26,6 +27,7 @@ public class Order {
 	private long id;
 	private String orderNumber;
 	@OneToMany(cascade = CascadeType.ALL) //This will make the a foreignkey of orderLIneitmes in order table
+	@JoinColumn(name="order_id")
 	private List<OrderLineItems> orderLineItemsList;
 	
 }
