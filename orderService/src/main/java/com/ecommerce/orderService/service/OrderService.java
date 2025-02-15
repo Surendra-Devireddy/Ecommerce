@@ -8,6 +8,8 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.sleuth.Span;
+import org.springframework.cloud.sleuth.Tracer;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -30,8 +32,9 @@ public class OrderService {
 	@Autowired
 	private OrderRepository orderRepository;
 	private final WebClient.Builder webClientBuilder;
+	private final Tracer tracer; //To generate the custom spanIds
 	
-	public void placeOrder(OrderDTO orderDTO) {
+	public String placeOrder(OrderDTO orderDTO) {
 		Order order = new Order();
 		order.setOrderNumber(UUID.randomUUID().toString());
 		
@@ -43,8 +46,9 @@ public class OrderService {
 		List<String> skuCodes = order.getOrderLineItemsList().stream()
 								.map(orderItem -> orderItem.getSkuCode()).toList();
 		
-	
+		Span inventoryServiceLookUp=tracer.nextSpan().name("InventoryServiceLookUp");
 		
+		try(Tracer.SpanInScope spanInScope= tracer.withSpan(inventoryServiceLookUp.start())){
 		
 		//Communicate with the Inventory service to check the availability of product
 		//Webclient is a latest HTTP Client in the Spring boot supports sync, async, streaming srevices
@@ -69,6 +73,7 @@ public class OrderService {
 		if(allProductsinStock) {
 			
 		orderRepository.save(order);
+		
 		//Making a synchronous call to inventory service to decrease the inventory quantity based on the order items
 		Map<String, Integer> inventoryData= new HashMap<>();
 		for(OrderLineItems orderLineItem : orderLineItems) {
@@ -81,9 +86,13 @@ public class OrderService {
 								.retrieve()
 								.bodyToMono(Void.class)
 								.block();
+		return "Order placed successfully";
 		}else {
 			throw new IllegalArgumentException("product not in stock");
 		}
+	  }finally {
+		  inventoryServiceLookUp.end();
+	  }
 	}
 	private boolean checkAvailability(OrderLineItemsDTO orderLineItemsDTO, InventoryResponse[] inventoryResponseArray) {
 		for(int i=0; i< inventoryResponseArray.length;i++) {
