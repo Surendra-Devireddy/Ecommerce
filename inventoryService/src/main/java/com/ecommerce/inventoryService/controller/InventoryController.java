@@ -46,6 +46,7 @@ public class InventoryController {
 	@ResponseStatus(HttpStatus.OK)
 	public List<InventoryResponse> isStockAvailable(@RequestParam(value="skuCode") List<String> skuCode) {
 		//Spring automaticall converts the url to a list
+		System.out.println("Inside Inventory method");
 		return inventoryService.getStockStatus(skuCode);
 	}
 	
@@ -60,6 +61,7 @@ public class InventoryController {
 	@PatchMapping(value="/quantityReduction")
 	@ResponseStatus(HttpStatus.OK)
 	public void quantityReduction(@RequestBody Map<String,Integer> inventoryData) {
+		System.out.println("Inside Inventory");
 		inventoryService.reduceQuantity(inventoryData);
 	}
 

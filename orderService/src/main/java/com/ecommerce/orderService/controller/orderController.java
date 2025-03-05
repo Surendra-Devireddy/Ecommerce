@@ -64,6 +64,6 @@ public class orderController {
 	//Resilience4j only counts failures when an exception is thrown 
 	
 	public CompletableFuture<String> FallBackResponseMethod(OrderDTO orderDTO, RuntimeException runTimeException) {
-		return CompletableFuture.supplyAsync(()-> "Oops! Something went wrong, Please order some time!");
+		return CompletableFuture.supplyAsync(()-> "Oops! Something went wrong, Please order some time later!");
 	}
 }

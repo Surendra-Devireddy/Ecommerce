@@ -24,7 +24,7 @@ public class InventoryService {
 	@Transactional(readOnly=true) // Since it is a getting data from database we put readOnly is true
 	public List<InventoryResponse> getStockStatus(List<String> skuCode) {
 		
-		//Simulating the slow 
+		/*Simulating the slow 
 		log.info("wait started");
 		try {
 			Thread.sleep(10000); //This will stop the thread for 10 seconds
@@ -33,7 +33,7 @@ public class InventoryService {
 			e.printStackTrace();
 		}
 		log.info("wait ended");
-		
+		*/
 		return inventoryRepository.findByskuCodeIn(skuCode).stream()
 				.map(inventory -> InventoryResponse.builder()
 						.skuCode(inventory.getSkuCode())

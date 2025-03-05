@@ -8,8 +8,10 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.sleuth.Span;
-import org.springframework.cloud.sleuth.Tracer;
+
+import io.micrometer.tracing.Span;
+import io.micrometer.tracing.Tracer;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -20,19 +22,23 @@ import com.ecommerce.orderService.DTO.OrderDTO;
 import com.ecommerce.orderService.DTO.OrderLineItemsDTO;
 import com.ecommerce.orderService.entity.Order;
 import com.ecommerce.orderService.entity.OrderLineItems;
+import com.ecommerce.orderService.events.OrderPlacedEvent;
 import com.ecommerce.orderService.repository.OrderRepository;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
 @Transactional
+@Slf4j
 public class OrderService {
 	
 	@Autowired
 	private OrderRepository orderRepository;
 	private final WebClient.Builder webClientBuilder;
 	private final Tracer tracer; //To generate the custom spanIds
+	private final KafkaTemplate<String, OrderPlacedEvent> kafkaTemplate;
 	
 	public String placeOrder(OrderDTO orderDTO) {
 		Order order = new Order();
@@ -49,6 +55,8 @@ public class OrderService {
 		Span inventoryServiceLookUp=tracer.nextSpan().name("InventoryServiceLookUp");
 		
 		try(Tracer.SpanInScope spanInScope= tracer.withSpan(inventoryServiceLookUp.start())){
+			
+			System.out.println("Inside try");
 		
 		//Communicate with the Inventory service to check the availability of product
 		//Webclient is a latest HTTP Client in the Spring boot supports sync, async, streaming srevices
@@ -71,7 +79,7 @@ public class OrderService {
 		 //All match works like if all isInStock is true then it returns true
 		 
 		if(allProductsinStock) {
-			
+			System.out.println("Line 1");
 		orderRepository.save(order);
 		
 		//Making a synchronous call to inventory service to decrease the inventory quantity based on the order items
@@ -86,7 +94,13 @@ public class OrderService {
 								.retrieve()
 								.bodyToMono(Void.class)
 								.block();
+		//Kafka template will send object as message to the notification topic
+		
+		System.out.println("Line 2");
+		
+		kafkaTemplate.send("notificationTopic", new OrderPlacedEvent(order.getOrderNumber()));
 		return "Order placed successfully";
+		
 		}else {
 			throw new IllegalArgumentException("product not in stock");
 		}
